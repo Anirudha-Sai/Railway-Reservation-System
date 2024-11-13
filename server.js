@@ -232,21 +232,43 @@ app.post('/get-ticket', (req, res) => {
 });
 
 app.post('/cancel-ticket', (req, res) => {
-    const { ticketID } = req.body; 
-    const query = `SELECT * FROM tickets,trains WHERE tickets.trainNumber=trains.trainNumber and ticketID = ?`;
+    const { ticketID } = req.body;
+    
+    if (!ticketID) {
+        return res.status(400).json({ success: false, message: 'Ticket ID is required' });
+    }
+    
+    const query = `SELECT * FROM tickets, trains WHERE tickets.trainNumber = trains.trainNumber AND ticketID = ?`;
+    
     db.get(query, [ticketID], (err, row) => {
         if (err) {
-            return res.status(500).json({ error: 'Error fetching Ticket details.' });
+            return res.status(500).json({ success: false, message: 'Error fetching ticket details.' });
         }
+
+        console.log("Row data fetched:", row);  // Print the row data for debugging
+
         if (row) {
-            const uQuery='UPDATE trains set ? = ? where trainNumber= ? ';
-            const delQuery='delete from tickets where ticketID= ? ';
-            return res.json({ success: true, ticket: row });
+            const availabilityField = row.seatType === "AC" ? "availability_AC" : "availability_nonAC";
+            const updateQuery = `UPDATE trains SET ${availabilityField} = ${availabilityField} + ? WHERE trainNumber = ?`;
+            
+            db.run(updateQuery, [row.numberOfPassengers, row.trainNumber], (updateErr) => {
+                if (updateErr) {
+                    return res.status(500).json({ success: false, message: 'Failed to update availability.' });
+                }
+                res.json({ success: true, message: 'Ticket canceled successfully' });
+            });
+            db.run(`DELETE FROM tickets WHERE ticketID = ?`, [ticketID], (deleteErr) => {
+                if (deleteErr) {
+                    return res.status(500).json({ success: false, message: 'Failed to delete ticket.' });
+                }
+                res.json({ success: true, message: 'Ticket canceled successfully' });
+            })
         } else {
-            return res.status(404).json({ success: false, error: 'Ticket not found.' });
+            res.status(404).json({ success: false, message: 'Ticket not found.' });
         }
     });
 });
+
 
 // Route for /customers
 app.get('/customers', (req, res) => {

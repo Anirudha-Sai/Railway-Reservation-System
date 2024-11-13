@@ -78,14 +78,13 @@
 
     <script>
         let currentTicketID = null;
-
         function fetchBookingStatus() {
             const ticketID = document.getElementById('ticketID').value.trim();
+            let tID=ticketID;
             if (!ticketID) {
                 alert('Please enter a valid Ticket ID.');
                 return;
             }
-
             fetch('http://localhost:3000/get-ticket', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -95,7 +94,7 @@
             .then(data => {
                 if (data.success) {
                     displayTicketDetails(data.ticket);
-                    currentTicketID = data.ticket.ticketID;  // Store the ticketID for cancellation
+                    currentTicketID = tID;  // Store the ticketID for cancellation
                 } else {
                     document.getElementById('ticketDetails').innerHTML = `<p>Ticket not found.</p>`;
                 }
@@ -115,8 +114,9 @@
             }
             ticket.totalCost = cost;
             const detailsContainer = document.getElementById('ticketDetails');
+            console.log(ticket);
             detailsContainer.innerHTML = `
-                <p><strong>Ticket ID:</strong> ${ticket.ticketID}</p>
+                <p><strong>Ticket ID:</strong> ${ticket.ticketId}</p>
                 <p><strong>Passenger Name:</strong> ${ticket.passengerName}</p>
                 <p><strong>Passenger Age:</strong> ${ticket.passengerAge}</p>
                 <p><strong>Train Number:</strong> ${ticket.trainNumber}</p>
