@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Train</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+        .form-container {
+            max-width: 400px;
+            margin: auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #45a049;
+        }
+        .error-message {
+            color: red;
+        }
+        .success-message {
+            color: green;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Details of new Train</h2>
+        <form id="customerForm">
+            <div class="form-group">
+                <label for="trainName">Train Name:</label>  
+                <input type="text" id="trainName" name="trainName" required>
+            </div>
+            <div class="form-group">
+                <label for="trainNumber">Train Number:</label>
+                <input type="number" id="trainNumber" name="trainNumber" required>
+            </div>
+            <div class="form-group">   
+                <label for="from">Source:</label>
+                <input type="text" id="source" name="source" required>
+            </div>
+            <div class="form-group">
+                <label for="to">Destination:</label>
+                <input type="text" id="destination" name="destination" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fare">AC Fare:</label>
+                <input type="number" id="fare_AC" name="fare_AC" required>
+            </div>
+
+            <div class="form-group">
+                <label for="availability">AC Availability:</label>
+                <input type="number" id="availability_AC" name="availability_AC" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fare">Non-AC Fare:</label>
+                <input type="number" id="fare_nonAC" name="fare_nonAC" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="availability">Non-AC Availability:</label>
+                <input type="number" id="availability_nonAC" name="availability_nonAC" required>
+            </div>
+
+            <p><strong>To Confirm your Identity: </strong></p>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+    
+            <div class="form-group">
+                <button type="submit">Verify & Add Train</button>
+            </div>
+            <p id="warningMessage" class="error-message"></p>
+            <p id="successMessage" class="success-message"></p>
+        </form>
+        
+        <!-- Button group for additional actions -->
+            <div class="form-group" id="actionButtons">
+                <button onclick="window.location.href = 'http://127.0.0.1:5501/details.html'">Go to Trains Page</button>
+            </div>
+    </div>
+    
+    <script>
+        document.getElementById('customerForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('http://localhost:3000/add-train', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        document.getElementById('warningMessage').textContent = err.message || 'An error occurred';
+                    });
+                }
+                // Show success message and action buttons
+                document.getElementById('successMessage').textContent = 'Train Added Successfully!';
+
+                // Optional: Redirect after success
+                // window.location.href = 'http://127.0.0.1:5501/Consumer/trains.html';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('warningMessage').textContent = 'An unexpected error occurred.';
+            });
+        });
+    </script>
+</body>
+</html>

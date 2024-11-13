@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancel Booking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .status-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 300px;
+        }
+        h1 {
+            color: #333;
+        }
+        label, p {
+            font-size: 16px;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .ticket-details {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .ticket-details p {
+            color: #333;
+        }
+        .cancel-btn {
+            margin-top: 15px;
+            background-color: #ff6347;
+            color: white;
+        }
+        .cancel-btn:hover {
+            background-color: #e53d27;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="status-container">
+        <h1>Cancel Booking</h1>
+        <label for="ticketID">Enter Ticket ID:</label>
+        <input type="text" id="ticketID" placeholder="e.g., A7bC3D2xYz">
+        <button onclick="fetchBookingStatus()">Cancel Booking</button>
+
+        <div class="ticket-details" id="ticketDetails"></div>
+    </div>
+
+    <script>
+        let currentTicketID = null;
+
+        function fetchBookingStatus() {
+            const ticketID = document.getElementById('ticketID').value.trim();
+            if (!ticketID) {
+                alert('Please enter a valid Ticket ID.');
+                return;
+            }
+
+            fetch('http://localhost:3000/get-ticket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticketID: ticketID }),  // Wrap ticketID in an object
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayTicketDetails(data.ticket);
+                    currentTicketID = data.ticket.ticketID;  // Store the ticketID for cancellation
+                } else {
+                    document.getElementById('ticketDetails').innerHTML = `<p>Ticket not found.</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching booking status:', error);
+                document.getElementById('ticketDetails').innerHTML = `<p>Error fetching ticket details. Please try again later.</p>`;
+            });
+        }
+
+        function displayTicketDetails(ticket) {
+            let cost = 0;
+            if (ticket.seatType === 'AC') {
+                cost = ticket.numberOfPassengers * ticket.fare_AC;
+            } else {
+                cost = ticket.numberOfPassengers * ticket.fare_nonAC;
+            }
+            ticket.totalCost = cost;
+            const detailsContainer = document.getElementById('ticketDetails');
+            detailsContainer.innerHTML = `
+                <p><strong>Ticket ID:</strong> ${ticket.ticketID}</p>
+                <p><strong>Passenger Name:</strong> ${ticket.passengerName}</p>
+                <p><strong>Passenger Age:</strong> ${ticket.passengerAge}</p>
+                <p><strong>Train Number:</strong> ${ticket.trainNumber}</p>
+                <p><strong>Train Name:</strong> ${ticket.trainName}</p>
+                <p><strong>Source:</strong> ${ticket.source}</p>
+                <p><strong>Destination:</strong> ${ticket.destination}</p>
+                <p><strong>Seat Type:</strong> ${ticket.seatType}</p>
+                <p><strong>Number of Passengers:</strong> ${ticket.numberOfPassengers}</p>
+                <p><strong>Total Cost:</strong> ₹${ticket.totalCost}</p>
+                <p><strong>Status:</strong> ${ticket.status}</p>
+            `;
+            // Add the Cancel Ticket button after displaying ticket details
+            detailsContainer.innerHTML += `
+                <button class="cancel-btn" onclick="cancelTicket()">Cancel Ticket</button>
+            `;
+        }
+
+        function cancelTicket() {
+            if (!currentTicketID) {
+                alert("Ticket ID is not available.");
+                return;
+            }
+
+            fetch('http://localhost:3000/cancel-ticket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticketID: currentTicketID }),  // Send ticketID to server for cancellation
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Ticket successfully canceled.');
+                    // Clear the ticket details after successful cancellation
+                    document.getElementById('ticketDetails').innerHTML = '';
+                } else {
+                    alert('Error canceling the ticket.');
+                }
+            })
+            .catch(error => {
+                console.error('Error canceling ticket:', error);
+                alert('Error canceling the ticket. Please try again later.');
+            });
+        }
+    </script>
+
+</body>
+</html>

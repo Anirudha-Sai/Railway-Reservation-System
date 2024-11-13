@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .success-message {
+            text-align: center;
+            color: green;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        /* Table Styling */
+        .results-table {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .results-table th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .results-table td {
+            background-color: #f9f9f9;
+            padding: 10px;
+            text-align: center;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .results-table tr:nth-child(even) td {
+            background-color: #f2f2f2;
+        }
+
+        .results-table tr:hover td {
+            background-color: #d4f0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Search Trains</h2>
+        <form id="customerForm">
+            <div class="form-group">
+                <label for="trainName">Train Name:</label>  
+                <input type="text" id="trainName" name="trainName">
+            </div>
+            <div class="form-group">
+                <label for="trainNumber">Train Number:</label>
+                <input type="number" id="trainNumber" name="trainNumber">
+            </div>
+            <div class="form-group">   
+                <label for="source">Source:</label>
+                <input type="text" id="source" name="source">
+            </div>
+            <div class="form-group">
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" name="destination">
+            </div>
+    
+            <div class="form-group">
+                <button type="submit">Search Trains</button>
+            </div>
+            <p id="warningMessage" class="error-message"></p>
+            <p id="successMessage" class="success-message"></p>
+        </form>
+    </div>
+
+    <!-- Table to Display Results -->
+    <div id="resultsContainer"></div>
+
+    <script>
+        function bookTrain(trainNumber) {
+            window.location.href = `book.html?trainNumber=${trainNumber}`;
+        }
+
+        document.getElementById('customerForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('http://localhost:3000/get-trains', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())  // Parse the response as JSON
+            .then(data => {
+                const warningMessage = document.getElementById('warningMessage');
+                const successMessage = document.getElementById('successMessage');
+                const resultsContainer = document.getElementById('resultsContainer');
+                resultsContainer.innerHTML = '';  // Clear any previous results
+                warningMessage.textContent = '';
+
+                if (data.trains && data.trains.length > 0) {
+                    // Build the table with all the train results
+                    let table = `<table class="results-table">
+                                    <tr>
+                                        <th>Train Name</th>
+                                        <th>Train Number</th>
+                                        <th>Source</th>
+                                        <th>Destination</th>
+                                        <th>AC Fare, Availability</th>
+                                        <th>Non-AC Fare, Availability</th>
+                                        <th></th>
+                                    </tr>`;
+
+                    data.trains.forEach(train => {
+                        let availabilityAC = String(train.availability_AC);
+                        let availabilityNonAC = String(train.availability_nonAC);
+
+                        if (train.availability_AC < 0) {
+                            availabilityAC = 'WL' + String(Math.abs(train.availability_AC));
+                        }
+
+                        if (train.availability_nonAC < 0) {
+                            availabilityNonAC = 'WL' + String(Math.abs(train.availability_nonAC));
+                        }
+
+                        table += `<tr>
+                                    <td>${train.trainName}</td>
+                                    <td>${train.trainNumber}</td>
+                                    <td>${train.source}</td>
+                                    <td>${train.destination}</td>
+                                    <td>${train.fare_AC}/-,      ${availabilityAC}</td>
+                                    <td>${train.fare_nonAC}/-,     ${availabilityNonAC}</td>
+                                    <td><button class="Book" onclick="bookTrain(${train.trainNumber})">Book</button></td>
+                                  </tr>`;
+                    });
+
+                    table += `</table>`;
+                    resultsContainer.innerHTML = table;
+                    successMessage.textContent = 'Trains found successfully!';
+                } else {
+                    warningMessage.textContent = data.message || 'No trains found for the provided details.';
+                    successMessage.textContent = '';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('warningMessage').textContent = 'An unexpected error occurred.';
+            });
+        });
+    </script>
+</body>
+</html>

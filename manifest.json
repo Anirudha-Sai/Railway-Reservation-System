@@ -1,0 +1,7 @@
+{
+    "serviceworker": {
+      "src": "service-worker.js",
+      "scope": "/"
+    }
+  }
+  

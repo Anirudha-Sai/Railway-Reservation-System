@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+        .ticket-container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .ticket-details div {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-container">
+        <h2>Ticket Details</h2>
+        <div class="ticket-details">
+            <div><strong>Ticket ID:</strong> <span id="ticketID"></span></div>
+            <div><strong>Train Name:</strong> <span id="ticketTrainName"></span></div>
+            <div><strong>Train Number:</strong> <span id="ticketTrainNumber"></span></div>
+            <div><strong>Source:</strong> <span id="ticketSource"></span></div>
+            <div><strong>Destination:</strong> <span id="ticketDestination"></span></div>
+            <div><strong>Seat Type:</strong> <span id="ticketSeatType"></span></div>
+            <div><strong>Passenger Name:</strong> <span id="ticketPassengerName"></span></div>
+            <div><strong>Passenger Age:</strong> <span id="ticketPassengerAge"></span></div>
+            <div><strong>Passenger Count:</strong> <span id="ticketPassengerCount"></span></div>
+            <div><strong>Total Cost:</strong> ₹<span id="ticketTotalCost"></span></div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            document.getElementById('ticketID').textContent = urlParams.get('ticketID');
+            document.getElementById('ticketTrainName').textContent = urlParams.get('trainName');
+            document.getElementById('ticketTrainNumber').textContent = urlParams.get('trainNumber');
+            document.getElementById('ticketSource').textContent = urlParams.get('trainSource');
+            document.getElementById('ticketDestination').textContent = urlParams.get('trainDestination');
+            document.getElementById('ticketSeatType').textContent = urlParams.get('seatType');
+            document.getElementById('ticketPassengerName').textContent = urlParams.get('passengerName');
+            document.getElementById('ticketPassengerAge').textContent = urlParams.get('passengerAge');
+            document.getElementById('ticketPassengerCount').textContent = urlParams.get('passengerCount');
+            document.getElementById('ticketTotalCost').textContent = urlParams.get('totalCost');
+        }
+    </script>
+</body>
+</html>

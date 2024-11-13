@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Train</title>
+    <style>
+        /* Styling for the booking form */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #45a049;
+        }
+        #total-cost {
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
+        /* Train details section - side-by-side layout */
+        .train-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Two columns */
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .train-details div {
+            font-weight: bold;
+        }
+        .train-details span {
+            font-weight: normal;
+        }
+        /* Sample Ticket Layout */
+        .ticket-container {
+            display: none; /* Hidden by default */
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+        .ticket-container h3 {
+            text-align: center;
+        }
+        .ticket-details {
+            margin-top: 15px;
+        }
+        .ticket-details div {
+            margin: 5px 0;
+        }
+        .ticket-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Book Train Ticket</h2>
+        
+        <!-- Train details section with grid layout -->
+        <div class="train-details">
+            <div>Name: <span id="trainNameValue"></span></div>
+            <div>Number: <span id="trainNumberValue"></span></div>
+            
+            <div>Source: <span id="trainSourceValue"></span></div>
+            <div>Destination: <span id="trainDestinationValue"></span></div>
+            
+            <div>AC Fare: <span id="fareACValue"></span>/-</div>
+            <div>AC Availability: <span id="availabilityACValue"></span></div>
+
+            <div>Non-AC Fare: <span id="fareNonACValue"></span>/-</div>
+            <div>Non-AC Availability: <span id="availabilityNonACValue"></span></div>
+        </div>
+
+        <!-- Booking form -->
+        <form id="bookingForm">
+            <div class="form-group">
+                <label for="passengerName">Passenger Name:</label>
+                <input type="text" id="passengerName" name="passengerName" required>
+            </div>
+            <div class="form-group">
+                <label for="passengerAge">Passenger Age:</label>
+                <input type="number" id="passengerAge" name="passengerAge" required>
+            </div>
+            <div class="form-group">
+                <label for="seatType">Seat Type:</label>
+                <select id="seatType" name="seatType" required>
+                    <option value="AC">AC</option>
+                    <option value="Non-AC">Non-AC</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="passengerCount">Number of Passengers:</label>
+                <input type="number" id="passengerCount" name="passengerCount" min="1" required>
+            </div>
+            <div class="form-group">
+                <button type="button" onclick="calculateTotal()">Calculate Total</button>
+            </div>
+            <p id="totalCost" class="form-group"></p>
+            <div class="form-group">
+                <button type="button" onclick="confirmBooking()">Confirm Booking</button>
+            </div>
+            <p id="bookingMessage" class="form-group"></p>
+        </form>
+    </div>
+
+
+    <script>
+        let trainNumber;
+        let fareAC = 0;
+        let fareNonAC = 0;
+        let availabilityAC = 0;
+        let availabilityNonAC = 0;
+        let trainName, trainSource, trainDestination;
+
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            trainNumber = urlParams.get('trainNumber');
+            fetchTrainDetails(trainNumber);
+        };
+
+        function fetchTrainDetails(trainNumber) {
+            fetch(`http://localhost:3000/get-train/${trainNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Store train details
+                    trainName = data.trainName;
+                    trainSource = data.source;
+                    trainDestination = data.destination;
+                    fareAC = data.fare_AC;
+                    fareNonAC = data.fare_nonAC;
+                    availabilityAC = data.availability_AC;
+                    availabilityNonAC = data.availability_nonAC;
+                    if(availabilityAC<0){
+                        availabilityAC='WL'+String(Math.abs(availabilityAC));
+                    }
+
+                    if(availabilityNonAC<0){
+                        availabilityNonAC='WL'+String(Math.abs(availabilityNonAC));
+                    }
+
+                    // Populate the train details section
+                    document.getElementById('trainNameValue').textContent = trainName;
+                    document.getElementById('trainNumberValue').textContent = trainNumber;
+                    document.getElementById('trainSourceValue').textContent = trainSource;
+                    document.getElementById('trainDestinationValue').textContent = trainDestination;
+                    document.getElementById('fareACValue').textContent = fareAC;
+                    document.getElementById('availabilityACValue').textContent = availabilityAC;
+                    document.getElementById('fareNonACValue').textContent = fareNonAC;
+                    document.getElementById('availabilityNonACValue').textContent = availabilityNonAC;
+                })
+                .catch(error => console.error('Error fetching train details:', error));
+        }
+
+        function calculateTotal() {
+            const seatType = document.getElementById('seatType').value;
+            const passengerCount = document.getElementById('passengerCount').value;
+            let totalCost = 0;
+
+            if (seatType === "AC") {
+                totalCost = fareAC * passengerCount;
+            } else {
+                totalCost = fareNonAC * passengerCount;
+            }
+
+            document.getElementById('totalCost').textContent = `Total Cost: ₹${totalCost}`;
+        }
+        function generateTicketID(length = 10) {
+        const characters = '0123456789';
+        let ticketID = '';
+        for (let i = 0; i < length; i++) {
+            ticketID += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return ticketID;
+    }
+    
+    // Example usage
+    
+    
+        function confirmBooking() {
+            const seatType = document.getElementById('seatType').value;
+            const passengerCount = parseInt(document.getElementById('passengerCount').value);
+
+            // Check availability
+            // if ((seatType === "AC" && passengerCount > availabilityAC) ||
+            //     (seatType === "Non-AC" && passengerCount > availabilityNonAC)) {
+            //     document.getElementById('bookingMessage').textContent = "Not enough seats available.";
+            //     return;
+            // }
+            if(seatType==='AC'){
+                if(availabilityAC > passengerCount){
+                status='Confirmed';
+                }
+                else{
+                    status='WL';
+                }
+            }
+            
+            if(seatType==='Non-AC'){
+                if(availabilityNonAC > passengerCount){
+                status='Confirmed';
+                }
+                else{
+                    status='WL';
+                }
+            }
+            const ticketID = generateTicketID();
+            const bookingData = {
+                ticketID,
+                trainName,
+                trainNumber,
+                passengerName: document.getElementById('passengerName').value,
+                passengerAge: document.getElementById('passengerAge').value,
+                seatType,
+                passengerCount,
+                trainSource,
+                trainDestination,
+                totalCost: seatType === "AC" ? fareAC * passengerCount : fareNonAC * passengerCount,
+                status,
+            };
+
+            fetch('http://localhost:3000/book-train', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('bookingMessage').textContent = 'Booking confirmed!';
+                    updateAvailability(seatType, passengerCount);
+                    showTicket(bookingData);  // Redirect to ticket page
+                } else {
+                    document.getElementById('bookingMessage').textContent = data.message || 'Booking failed.';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateAvailability(seatType, count) {
+            if (seatType === "AC") {
+                availabilityAC -= count;
+            } else {
+                availabilityNonAC -= count;
+            }
+        }
+
+        function showTicket(bookingData) {
+            // Redirect to ticket.html page with booking details
+            const queryParams = new URLSearchParams(bookingData).toString();
+            window.location.href = `ticket.html?${queryParams}`;
+        }
+    </script>
+</body>
+</html>
