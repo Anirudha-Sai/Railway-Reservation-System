@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Profile</title>
+    <style>
+       body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        header {
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 25px;            
+            height: 10%;
+            border: 2px solid #4CAF50;
+            position: relative;
+        }
+        .header-content {
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+        }
+        header p {
+            color: #d4f0d2;
+            font-size: 14px;
+        }
+        /* Navigation Bar */
+        .navbar {
+            display: inline-block !important;
+            position: relative;
+            left: 26%;
+            justify-content: center;
+            padding-bottom: 15px;
+        }
+        .navbar a {
+            margin: 10px 10px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: bold;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .navbar a:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .auth-buttons{
+            position: absolute;
+            top:5px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .auth-buttons a{
+            margin:2px !important;
+            text-align: center;
+            padding: 8px 15px;
+            color: white;
+            background-color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            top: 250px;
+        }
+        .auth-buttons a:hover {
+            background-color: #555;
+        }
+        
+        .profile-container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .profile-info {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .profile-info h2 {
+            margin: 0 0 10px 0;
+            color: #4CAF50;
+        }
+        .profile-info p {
+            margin: 5px 0;
+            padding: 15px;
+            font-size: 16px;
+        }
+        #getTicketsButton{
+            position: relative;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            left:35%;
+            width: 30%;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a class="home" href="home.html">🏡</a>
+        <div class="navbar-whole">
+            <div class="navbar">
+            <a href="search-trains.html">Search Trains</a>
+            <a href="search-trains.html">Book a Ticket</a>
+            <a href="ticket-status.html">Ticket Status</a>
+            <a href="cancel-ticket.html">Cancel Ticket</a>
+            </div>
+            <div class="auth-buttons">
+                <a id="loginButton" href="login.html">Login</a>
+                <a id="signupButton" href="signup.html">Signup</a>
+                <a id="profileButton" href="profile.html">Profile</a>
+                <a id="logoutButton" href="#" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="profile-container">
+        <div id="profileInfo" class="profile-info">
+            <!-- Passenger information will be displayed here -->
+        </div>
+        <button id="getTicketsButton">Get All Tickets</button>
+        <div id="ticketsContainer" class="tickets-container">
+            <!-- Tickets will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const phone = sessionStorage.getItem('phone');
+            if (!phone) {
+                document.getElementById('profileInfo').innerHTML = '<p>No passenger information available.</p>';
+                return;
+            }
+
+            fetch(`http://localhost:3000/passenger?phone=${sessionStorage.getItem('phone')}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const profileInfo = document.getElementById('profileInfo');
+                        profileInfo.innerHTML = `
+                            <h2>${data.name}</h2>
+                            <p><strong>Phone:</strong> ${data.phone}</p>
+                            <p><strong>Email:</strong> ${data.email}</p>
+                            <p><strong>Address:</strong> ${data.address}</p>
+                        `;
+                    } else {
+                        document.getElementById('profileInfo').innerHTML = '<p>Failed to load passenger information.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('profileInfo').innerHTML = '<p>An error occurred while fetching passenger information.</p>';
+                });
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'home.html';
+        }
+        if (sessionStorage.getItem('phone')) {
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('signupButton').style.display = 'none';
+            document.getElementById('profileButton').style.display = 'block';
+            profileButton.textContent = sessionStorage.getItem('name');
+            document.getElementById('logoutButton').style.display = 'block';
+        }
+        if (!sessionStorage.getItem('phone')) {
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('signupButton').style.display = 'block';
+            document.getElementById('profileButton').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
+        document.getElementById('getTicketsButton').addEventListener('click', function () {
+    fetch(`http://localhost:3000/tickets?phone=${sessionStorage.getItem('phone')}`)
+        .then(response => {
+            if (!response.ok) {
+                // Handle HTTP errors (e.g., 404 or 500)
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const ticketsContainer = document.getElementById('ticketsContainer');
+                ticketsContainer.innerHTML = `
+                    <h3>Booked Tickets</h3>
+                    <ul>
+                        ${data.tickets
+                            .map(
+                                ticket => `
+                            <li>
+                                <p><strong>Ticket ID:</strong> ${ticket.ticketId}</p>
+                                <p><strong>Passenger Name:</strong> ${ticket.passengerName}</p>
+                                <p><strong>Passenger Age:</strong> ${ticket.passengerAge}</p>
+                                <p><strong>Train Number:</strong> ${ticket.trainNumber}</p>
+                                <p><strong>Number of Passengers:</strong> ${ticket.numberOfPassengers}</p>
+                                <p><strong>Seat Type:</strong> ${ticket.seatType}</p>
+                                <p><strong>Status:</strong> ${ticket.status}</p>
+                            </li>`
+                            )
+                            .join('')}
+                    </ul>`;
+            } else {
+                document.getElementById('ticketsContainer').textContent = data.message;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('ticketsContainer').innerHTML = '<p>An error occurred while fetching tickets.</p>';
+        });
+});
+
+
+    </script>
+</body>
+</html>

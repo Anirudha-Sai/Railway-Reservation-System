@@ -146,8 +146,10 @@
             <p>Your one-stop solution for booking, managing, and tracking your train journeys.</p>
         </div>
         <div class="auth-buttons">
-            <a href="login.html">Login</a>
-            <a href="signup.html">Signup</a>
+            <a id="loginButton" href="login.html">Login</a>
+            <a id="signupButton" href="signup.html">Signup</a>
+            <a id="profileButton" href="profile.html">Profile</a>
+            <a id="logoutButton" href="#" onclick="logout()">LogOut</a>
         </div>
     </header>
 
@@ -195,6 +197,25 @@
     <footer>
         <p>&copy; 2024 Railway Reservation System. All Rights Reserved.</p>
     </footer>
+    <script>
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'home.html';
+        }
+        if (sessionStorage.getItem('phone')) {
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('signupButton').style.display = 'none';
+            document.getElementById('profileButton').style.display = 'block';
+            profileButton.textContent = sessionStorage.getItem('name');
+            document.getElementById('logoutButton').style.display = 'block';
+        }
+        if (!sessionStorage.getItem('phone')) {
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('signupButton').style.display = 'block';
+            document.getElementById('profileButton').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
+    </script>
 
 </body>
 </html>

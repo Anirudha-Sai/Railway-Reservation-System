@@ -28,8 +28,9 @@
         .navbar {
             display: inline-block !important;
             position: relative;
-            left: 25%;
+            left: 26%;
             justify-content: center;
+            padding-bottom: 15px;
         }
         .navbar a {
             margin: 10px 10px;
@@ -44,6 +45,38 @@
         .navbar a:hover {
             background-color: #4CAF50;
             color: white;
+        }
+        .auth-buttons{
+            position: absolute;
+            top:5px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .auth-buttons a{
+            margin:2px !important;
+            text-align: center;
+            padding: 8px 15px;
+            color: white;
+            background-color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            top: 250px;
+        }
+        .auth-buttons a:hover {
+            background-color: #555;
+        }
+        
+        .profile-container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
     
@@ -151,11 +184,19 @@
 <body>
     <header>
         <a class="home" href="home.html">🏡</a>
-        <div class="navbar">
+        <div class="navbar-whole">
+            <div class="navbar">
             <a href="search-trains.html">Search Trains</a>
             <a href="search-trains.html">Book a Ticket</a>
             <a href="ticket-status.html">Ticket Status</a>
             <a href="cancel-ticket.html">Cancel Ticket</a>
+            </div>
+            <div class="auth-buttons">
+                <a id="loginButton" href="login.html">Login</a>
+                <a id="signupButton" href="signup.html">Signup</a>
+                <a id="profileButton" href="profile.html">Profile</a>
+                <a id="logoutButton" href="#" onclick="logout()">Logout</a>
+            </div>
         </div>
     </header>
     
@@ -265,6 +306,23 @@
                 document.getElementById('warningMessage').textContent = 'An unexpected error occurred.';
             });
         });
+    function logout() {
+            sessionStorage.clear();
+            window.location.href = 'home.html';
+        }
+        if (sessionStorage.getItem('phone')) {
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('signupButton').style.display = 'none';
+            document.getElementById('profileButton').style.display = 'block';
+            profileButton.textContent = sessionStorage.getItem('name');
+            document.getElementById('logoutButton').style.display = 'block';
+        }
+        if (!sessionStorage.getItem('phone')) {
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('signupButton').style.display = 'block';
+            document.getElementById('profileButton').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
     </script>
 </body>
 </html>

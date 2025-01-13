@@ -59,6 +59,23 @@
             document.getElementById('ticketPassengerCount').textContent = urlParams.get('passengerCount');
             document.getElementById('ticketTotalCost').textContent = urlParams.get('totalCost');
         }
+    function logout() {
+            sessionStorage.clear();
+            window.location.href = 'home.html';
+        }
+        if (sessionStorage.getItem('phone')) {
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('signupButton').style.display = 'none';
+            document.getElementById('profileButton').style.display = 'block';
+            profileButton.textContent = sessionStorage.getItem('name');
+            document.getElementById('logoutButton').style.display = 'block';
+        }
+        if (!sessionStorage.getItem('phone')) {
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('signupButton').style.display = 'block';
+            document.getElementById('profileButton').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
     </script>
 </body>
 </html>

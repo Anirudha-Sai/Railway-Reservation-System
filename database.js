@@ -54,7 +54,8 @@ db.serialize(() => {
         trainNumber TEXT,
         numberOfPassengers NUMBER,
         seatType TEXT,
-        status TEXT
+        status TEXT,
+        mobileNumber TEXT
     )`, (err) => {
         if (err) {
             console.error('Error creating Tickets table:', err.message);

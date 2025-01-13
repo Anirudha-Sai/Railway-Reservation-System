@@ -47,7 +47,29 @@ app.post('/login', (req, res) => {
         }
 
         // Login successful
-        res.redirect('http://127.0.0.1:5501/Consumer/home.html');
+        res.json({ success: true,phone: row.phone,name:row.name, message: 'Login successful' });
+    });
+});
+
+app.get('/passenger', (req, res) => {
+    const phone = req.query.phone;
+
+    if (!phone) {
+        return res.status(400).json({ success: false, message: 'Phone number is required.' });
+    }
+
+    const query = `SELECT * FROM customers WHERE phone = ?`;
+    db.get(query, [phone], (err, row) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal server error.');
+        }
+
+        if (!row) {
+            return res.status(404).json({ success: false, message: 'Passenger not found.' });
+        }
+
+        res.json({ success: true, name: row.name, phone: row.phone, email: row.email, address: row.address });
     });
 });
 
@@ -89,6 +111,28 @@ app.post('/add-customer', [
             // Redirect to login.html from the server side
             res.status(200).json({ message: 'Customer added successfully!'});
         });
+    });
+});
+
+app.get('/tickets', (req, res) => {
+    const phone = req.query.phone;
+
+    if (!phone) {
+        return res.status(400).json({ success: false, message: 'Phone number is required.' });
+    }
+
+    const query = `SELECT * FROM tickets WHERE mobileNumber = ?`;
+    db.all(query, [phone], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ success: false, message: 'Internal server error.' });
+        }
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'No tickets found.' });
+        }
+
+        res.json({ success: true, tickets: rows });
     });
 });
 
